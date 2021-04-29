@@ -11,7 +11,7 @@ This repository contains a different version of VPC templates, where each VPC pr
 - Private Route Table
 - Private Route Table Association
 
-1. Version ```vpc_v1``` is hard coded, it is easy to read and great if you just started of with Terraform. Another reason why I have this example is to compare and show of how you can shorten your code using functions and meta-argumets by avoiding repeatable resources. The only trick we used here is on tags, we used ```merge``` function since we don't want to repeat the same environment and project name we used locals.tf file for it, where common tags were defined, and in the resource blocks we merged the common tags with the name of the resouce which are unique.
+1. Version ```vpc_v_1.0``` is hard coded, it is easy to read and great if you just started of with Terraform. Another reason why I have this example is to compare and show of how you can shorten your code using functions and meta-argumets by avoiding repeatable resources. The only trick we used here is on tags, we used ```merge``` function since we don't want to repeat the same environment and project name we used locals.tf file for it, where common tags were defined, and in the resource blocks we merged the common tags with the name of the resouce which are unique.
 
 locals.tf
 ```
@@ -32,7 +32,7 @@ vpc.tf
   )
 ```
 
-2. Version ```vpc_v2``` configured with count meta-argument. 
+2. Version ```vpc_v_1.2``` configured with count meta-argument. 
 
 This version of VPC template is configured with ```count.index``` object, ```element```, ```lenght```, and ```merge``` functions. Here we have repeatable resources such as public/private subnets and public/private route table associations.  With one public/private subnet resource block we are able to provision three public/private subnets and instead of repeating the route table association three times we cofigured it with one resource block. For tags we used ```merge``` function for ```common_tags``` same as on previous example it's helpful to make your code clean and short.
 
@@ -107,5 +107,40 @@ output "public_subnets_cidr" {
 }
 output "private_subnets_cidr" {
   value = aws_subnet.private_subnet_[*].*.id
+}
+```
+
+3. Version ```vpc_v_1.3``` 
+
+In this template "for_each" function with "local" variables were used for creation 
+of subnets and and route table association. In our case we are working with "map" value, 
+although "for_each" can work with "string" value as well as with "map" value. We are passing
+separate settings for each subnet, while using the keys/values for generating subnets.
+
+vpc.tf public subnet
+```
+# Public Subnets
+
+resource "aws_subnet" "public_subnet_" {
+  for_each          = local.public_subnet
+  vpc_id            = aws_vpc.my_vpc.id
+  availability_zone = each.value.availability_zone
+  cidr_block        = each.value.cidr_block
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.env}_pub_sub_${each.key}"
+    }
+  )
+}
+```
+vpc.tf public route table association
+```
+# Public Route Table Association
+
+resource "aws_route_table_association" "pub_subnet" {
+  for_each       = local.public_subnet
+  subnet_id      = aws_subnet.public_subnet_[each.key].id
+  route_table_id = aws_route_table.pub_rtb.id
 }
 ```
