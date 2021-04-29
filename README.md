@@ -32,7 +32,7 @@ vpc.tf
   )
 ```
 
-2. Version ```vpc_v_1.2``` configured with count meta-argument. 
+2. Version ```vpc_v_1.2``` configured with [count meta-argument](https://www.terraform.io/docs/language/meta-arguments/count.html). 
 
 This version of VPC template is configured with ```count.index``` object, ```element```, ```lenght```, and ```merge``` functions. Here we have repeatable resources such as public/private subnets and public/private route table associations.  With one public/private subnet resource block we are able to provision three public/private subnets and instead of repeating the route table association three times we cofigured it with one resource block. For tags we used ```merge``` function for ```common_tags``` same as on previous example it's helpful to make your code clean and short.
 
@@ -110,13 +110,22 @@ output "private_subnets_cidr" {
 }
 ```
 
-3. Version ```vpc_v_1.3``` 
+3. Version ```vpc_v_1.3``` with [for_each meta-argument](https://www.terraform.io/docs/language/meta-arguments/for_each.html).
 
-In this template "for_each" function with "local" variables were used for creation 
-of subnets and and route table association. In our case we are working with "map" value, 
+In this template we used ```for_each``` meta-argument with ```locals``` and for tags we used ```merge``` function, using hepls us to create  three subnets and and three route table association with one resource block. In our case we are working with "map" value, 
 although "for_each" can work with "string" value as well as with "map" value. We are passing
 separate settings for each subnet, while using the keys/values for generating subnets.
 
+locals.tf
+```
+locals {
+  public_subnet = {
+    1 = { availability_zone = "us-east-1a", cidr_block = "10.0.1.0/24" },
+    2 = { availability_zone = "us-east-1b", cidr_block = "10.0.2.0/24" },
+    3 = { availability_zone = "us-east-1c", cidr_block = "10.0.3.0/24" }
+  }
+}
+```
 vpc.tf public subnet
 ```
 # Public Subnets
