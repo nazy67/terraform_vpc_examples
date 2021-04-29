@@ -166,4 +166,6 @@ resource "aws_route_table_association" "pub_subnet" {
 
 [Manage Similar Resources with Count](https://learn.hashicorp.com/tutorials/terraform/count?in=terraform/0-13&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
 
-[Local Values](https://www.terraform.io/docs/language/values/locals.html), [Input Variables](https://www.terraform.io/docs/language/values/variables.html), [element Function](https://www.terraform.io/docs/language/functions/element.html), [length Function](https://www.terraform.io/docs/language/functions/length.html), [index Function](https://www.terraform.io/docs/language/functions/index_function.html), [merge Function](https://www.terraform.io/docs/language/functions/merge.html), [keys Function](https://www.terraform.io/docs/language/functions/keys.html), [values Function](https://www.terraform.io/docs/language/functions/values.html)
+[Variables and Outputs](https://www.terraform.io/docs/language/values/index.html)
+ 
+Functions: [element Function](https://www.terraform.io/docs/language/functions/element.html), [length Function](https://www.terraform.io/docs/language/functions/length.html), [index Function](https://www.terraform.io/docs/language/functions/index_function.html), [merge Function](https://www.terraform.io/docs/language/functions/merge.html), [keys Function](https://www.terraform.io/docs/language/functions/keys.html), [values Function](https://www.terraform.io/docs/language/functions/values.html)
