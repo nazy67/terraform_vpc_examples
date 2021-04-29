@@ -11,7 +11,7 @@ This repository contains a different version of VPC templates, where each VPC pr
 - Private Route Table
 - Private Route Table Association
 
-1. Version ```vpc_v_1.0``` is hard coded, it is easy to read and great if you just started of with Terraform. Another reason why I have this example is to compare and show of how you can shorten your code using functions and meta-argumets by avoiding repeatable resources. The only trick we used here is on tags, we used ```merge``` function since we don't want to repeat the same environment and project name we used locals.tf file for it, where common tags were defined, and in the resource blocks we merged the common tags with the name of the resouce which are unique.
+1. Version ```vpc_v_1.0``` is reusable template with variables, it is easy to read and great if you just started of with Terraform. Another reason for having this example I wanted to compare and show, how you can shorten your code using functions and meta-argumets. The only trick we used here is on tags section, we used ```merge``` function since we don't want to repeat the same environment and project name we used locals.tf file for it, where common tags were defined, and in the resource blocks we merged the common tags with the name of the resouce which are unique.
 
 locals.tf
 ```
@@ -22,7 +22,7 @@ locals {
   }
 }
 ```
-vpc.tf
+vpc.tf tags
 ```
   tags = merge(
     local.common_tags,
@@ -34,7 +34,7 @@ vpc.tf
 
 2. Version ```vpc_v_1.2``` configured with [count meta-argument](https://www.terraform.io/docs/language/meta-arguments/count.html). 
 
-This version of VPC template is configured with ```count.index``` object, ```element```, ```lenght```, and ```merge``` functions. Here we have repeatable resources such as public/private subnets and public/private route table associations.  With one public/private subnet resource block we are able to provision three public/private subnets and instead of repeating the route table association three times we cofigured it with one resource block. For tags we used ```merge``` function for ```common_tags``` same as on previous example it's helpful to make your code clean and short.
+This version of VPC template is configured with ```count``` meta-argument, ```element```, ```lenght```, ```index``` and ```merge``` functions, for tags ```locals``` were used. When we have similar resources such as public/private subnets and public/private route table associations we can use ```count``` to avoid repeating.  With one public/private subnet resource block we are able to provision three public/private subnets and instead of repeating the route table association three times we cofigured it with one resource block. In tfvars/dev.tf we used ```list(strings)``` value type for passing the  values of attributes. For tags we used ```merge``` function for ```common_tags``` same as on previous example it's helpful to make your code clean and short.
 
 variables.tf where we defined our variables.
 ```
@@ -112,9 +112,7 @@ output "private_subnets_cidr" {
 
 3. Version ```vpc_v_1.3``` with [for_each meta-argument](https://www.terraform.io/docs/language/meta-arguments/for_each.html).
 
-In this template we used ```for_each``` meta-argument with ```locals``` and for tags we used ```merge``` function, using hepls us to create  three subnets and and three route table association with one resource block. In our case we are working with "map" value, 
-although "for_each" can work with "string" value as well as with "map" value. We are passing
-separate settings for each subnet, while using the keys/values for generating subnets.
+In this template we used ```for_each``` meta-argument with ```locals``` and we used ```key```, ```value```, ```merge``` functions, using listed above hepls us to create three ```subnets``` with one resource block and three ```route table association``` with another resource block. In this case we are working with ```map``` value type for the attribute values, although  ```for_each``` can work with ```list``` and ```sets``` as well. We are passing different values for each subnet in locals.tf and ```for_each``` is looping and getting values for each subnet and generating multiple subnets as well as route table association.
 
 locals.tf
 ```
@@ -126,7 +124,7 @@ locals {
   }
 }
 ```
-vpc.tf public subnet
+vpc.tf public subnet part
 ```
 # Public Subnets
 
@@ -143,6 +141,7 @@ resource "aws_subnet" "public_subnet_" {
   )
 }
 ```
+
 vpc.tf public route table association
 ```
 # Public Route Table Association
@@ -153,3 +152,32 @@ resource "aws_route_table_association" "pub_subnet" {
   route_table_id = aws_route_table.pub_rtb.id
 }
 ```
+
+### Notes
+
+- You can not use both ```count``` and ```for_each``` in one resource or module block, it has to be one of them.
+
+- If your instances are almost identical, ```count``` is appropriate. If some of their arguments need distinct values that can't be directly derived from an integer, it's safer to use ```for_each```.
+
+
+###  Useful links
+
+[Manage Similar Resources with For Each](https://learn.hashicorp.com/tutorials/terraform/for-each?in=terraform/0-13&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
+
+[Manage Similar Resources with Count](https://learn.hashicorp.com/tutorials/terraform/count?in=terraform/0-13&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
+
+[Local Values](https://www.terraform.io/docs/language/values/locals.html)
+
+[Input Variables](https://www.terraform.io/docs/language/values/variables.html)
+
+[element Function](https://www.terraform.io/docs/language/functions/element.html)
+
+[length Function](https://www.terraform.io/docs/language/functions/length.html)
+
+[index Function](https://www.terraform.io/docs/language/functions/index_function.html)
+
+[merge Function](https://www.terraform.io/docs/language/functions/merge.html)
+
+[keys Function](https://www.terraform.io/docs/language/functions/keys.html)
+
+[values Function](https://www.terraform.io/docs/language/functions/values.html)
