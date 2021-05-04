@@ -66,7 +66,7 @@ priv_cidr_subnet = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
 Public subnet resource block
 ```
 # Public Subnets
-resource "aws_subnet" "public_subnet_" {
+resource "aws_subnet" "public_subnet" {
   count             = length(var.subnet_azs)
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = element(var.pub_cidr_subnet, count.index)
@@ -86,7 +86,7 @@ Public Subnet Association
 resource "aws_route_table_association" "pub_subnets" {
   count = length(var.subnet_azs)
 
-  subnet_id      = element(aws_subnet.public_subnet_.*.id, count.index)
+  subnet_id      = element(aws_subnet.public_subnet.*.id, count.index)
   route_table_id = element(aws_route_table.pub_rtb.*.id, count.index)
 }
 ```
@@ -97,16 +97,10 @@ output "vpc_id" {
   value = aws_vpc.my_vpc.id
 }
 output "public_subnets" {
-  value = aws_subnet.public_subnet_[*].*.id
+  value = aws_subnet.public_subnet[*].id
 }
 output "private_subnets" {
-  value = aws_subnet.private_subnet_[*].*.id
-}
-output "public_subnets_cidr" {
-  value = aws_subnet.public_subnet_[*].*.id
-}
-output "private_subnets_cidr" {
-  value = aws_subnet.private_subnet_[*].*.id
+  value = aws_subnet.private_subnet[*].id
 }
 ```
 
