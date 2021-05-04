@@ -13,7 +13,7 @@ resource "aws_vpc" "my_vpc" {
 }
 
 # Public Subnets
-resource "aws_subnet" "public_subnet_" {
+resource "aws_subnet" "public_subnet" {
   count             = length(var.subnet_azs)
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = element(var.pub_cidr_subnet, count.index)
@@ -27,7 +27,7 @@ resource "aws_subnet" "public_subnet_" {
 }
 
 # Private Subnets
-resource "aws_subnet" "private_subnet_" {
+resource "aws_subnet" "private_subnet" {
   count             = length(var.subnet_azs)
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = element(var.priv_cidr_subnet, count.index)
@@ -72,7 +72,7 @@ resource "aws_route_table" "pub_rtb" {
 resource "aws_route_table_association" "pub_subnets" {
   count = length(var.subnet_azs)
 
-  subnet_id      = element(aws_subnet.public_subnet_.*.id, count.index)
+  subnet_id      = element(aws_subnet.public_subnet.*.id, count.index)
   route_table_id = element(aws_route_table.pub_rtb.*.id, count.index)
 }
 
@@ -91,7 +91,7 @@ resource "aws_eip" "nat_gw_eip" {
 resource "aws_nat_gateway" "nat_gw" {
   depends_on    = [aws_internet_gateway.igw]
   allocation_id = aws_eip.nat_gw_eip.id
-  subnet_id     = aws_subnet.public_subnet_[0].id
+  subnet_id     = aws_subnet.public_subnet[0].id
   tags = merge(
     local.common_tags,
     {
@@ -120,6 +120,6 @@ resource "aws_route_table" "private_rtb" {
 resource "aws_route_table_association" "priv_subnets" {
   count = length(var.subnet_azs)
 
-  subnet_id      = element(aws_subnet.private_subnet_.*.id, count.index)
+  subnet_id      = element(aws_subnet.private_subnet.*.id, count.index)
   route_table_id = element(aws_route_table.private_rtb.*.id, count.index)
 }
